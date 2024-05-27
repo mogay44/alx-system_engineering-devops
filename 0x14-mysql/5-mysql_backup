@@ -1,11 +1,26 @@
-#!/usr/bin/env bash
-# backup and compress my databases
+#!/bin/bash
 
-# variables
-day=$(date +"%d")
-month=$(date +"%m")
-year=$(date +"%Y")
-file_name="$day-$month-$year.tar.gz"
+# Check if the password argument is provided
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <root_password>"
+    exit 1
+fi
 
-mysqldump --all-databases -u root --password="$1" > backup.sql
-tar -czvf "$file_name" backup.sql
+# Get today's date in the format day-month-year
+DATE=$(date +%d-%m-%Y)
+
+# Define the MySQL root password
+ROOT_PASSWORD="$1"
+
+# Generate the MySQL dump
+echo "Generating MySQL dump..."
+mysqldump -u root -p"$ROOT_PASSWORD" --all-databases > backup.sql
+
+# Compress the dump into a tar.gz archive
+echo "Compressing dump..."
+tar czvf "${DATE}.tar.gz" backup.sql
+
+# Remove the uncompressed dump file
+rm backup.sql
+
+echo "Backup completed successfully."
